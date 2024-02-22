@@ -248,7 +248,7 @@ if optimize:
 else:
     # Fit primal logistic regression
     print("Logistic regression: ")
-    log_primal = LogisticRegression(C=100, class_weight=None, dual=False, fit_intercept=True,intercept_scaling=1, max_iter=250,n_jobs=None, 
+    log_primal = LogisticRegression(C=100, class_weight='balanced', dual=False, fit_intercept=True,intercept_scaling=1, max_iter=250,n_jobs=None, 
                                     penalty='l2', random_state=None, solver='lbfgs',tol=1e-05, verbose=0, warm_start=False)
     log_primal.fit(df_train.loc[:, df_train.columns != 'Exited'],df_train.Exited)
 
@@ -264,8 +264,21 @@ else:
     print("Logistic regression with pol2 kernel: ")
     poly2 = PolynomialFeatures(degree=2)
     df_train_pol2 = poly2.fit_transform(df_train.loc[:, df_train.columns != 'Exited'])
-    log_pol2 = LogisticRegression(C=10, class_weight=None, dual=False, fit_intercept=True,intercept_scaling=1, max_iter=300,  n_jobs=None, 
-                                penalty='l2', random_state=None, solver='liblinear',tol=0.0001, verbose=0, warm_start=False)
+    log_pol2 = LogisticRegression(
+        C=10,
+        class_weight="balanced",
+        dual=False,
+        fit_intercept=True,
+        intercept_scaling=1,
+        max_iter=300,
+        n_jobs=None,
+        penalty="l2",
+        random_state=None,
+        solver="liblinear",
+        tol=0.0001,
+        verbose=0,
+        warm_start=False,
+    )
     log_pol2.fit(df_train_pol2,df_train.Exited)
 
     print(classification_report(df_train.Exited, log_pol2.predict(df_train_pol2)))
@@ -276,9 +289,7 @@ else:
     SVM_RBF = SVC(
         C=100,
         cache_size=200,
-
-
-        class_weight=None,
+        class_weight="balanced",
         coef0=0.0,
         decision_function_shape="ovr",
         degree=3,
@@ -306,7 +317,7 @@ else:
     SVM_POL = SVC(
         C=100,
         cache_size=200,
-        class_weight=None,
+        class_weight='balanced',
         coef0=0.0,
         decision_function_shape="ovr",
         degree=2,
@@ -333,7 +344,7 @@ else:
     print("RandomForestClassifier: ")
     RF = RandomForestClassifier(
         bootstrap=True,
-        class_weight=None,
+        class_weight="balanced",
         criterion="gini",
         max_depth=8,
         max_features=6,
@@ -430,7 +441,6 @@ else:
     plt.savefig('roc_results_ratios.pdf')
     # plt.show()
 
-
     print(
         classification_report(
             df_test.Exited, RF.predict(df_test.loc[:, df_test.columns != "Exited"])
@@ -438,7 +448,7 @@ else:
     )
 
     auc_RF_test, fpr_RF_test, tpr_RF_test = get_auc_scores(df_test.Exited, RF.predict(df_test.loc[:, df_test.columns != 'Exited']),
-                                                       RF.predict_proba(df_test.loc[:, df_test.columns != 'Exited'])[:,1])
+                                                RF.predict_proba(df_test.loc[:, df_test.columns != 'Exited'])[:,1])
     plt.figure(figsize = (12,6), linewidth= 1)
     plt.plot(fpr_RF_test, tpr_RF_test, label = 'RF score: ' + str(round(auc_RF_test, 5)))
     plt.plot([0,1], [0,1], 'k--', label = 'Random: 0.5')
@@ -447,4 +457,3 @@ else:
     plt.title('ROC Curve')
     plt.legend(loc='best')
     plt.savefig('roc_results_ratios_test.pdf')
-    plt.show()
