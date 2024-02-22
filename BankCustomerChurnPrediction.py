@@ -73,28 +73,20 @@ sns.boxplot(y="EstimatedSalary", x="Exited", hue="Exited", data=df, ax=axarr[2][
 plt.savefig("customer_churn_relations_continuous.pdf")
 plt.close()
 
-# Split Train, test data
-df_train = df.sample(frac=0.8, random_state=200)
-df_test = df.drop(df_train.index)
-print(len(df_train))
-print(len(df_test))
 
-df_train["BalanceSalaryRatio"] = df_train.Balance / df_train.EstimatedSalary
-sns.boxplot(y="BalanceSalaryRatio", x="Exited", hue="Exited", data=df_train)
+df["BalanceSalaryRatio"] = df.Balance / df.EstimatedSalary
+sns.boxplot(y="BalanceSalaryRatio", x="Exited", hue="Exited", data=df)
 plt.ylim(-1, 5)
 plt.savefig("BalanceSalaryRatio.pdf")
 
 # Given that tenure is a 'function' of age, we introduce a variable aiming to standardize tenure over age:
-df_train["TenureByAge"] = df_train.Tenure / (df_train.Age)
-sns.boxplot(y="TenureByAge", x="Exited", hue="Exited", data=df_train)
+df["TenureByAge"] = df.Tenure / (df.Age)
+sns.boxplot(y="TenureByAge", x="Exited", hue="Exited", data=df)
 plt.ylim(-1, 1)
 plt.savefig("TenureByAge.pdf")
 
-# LIntroduce a variable to capture credit score given age to take into account credit behaviour visavis adult life
-df_train["CreditScoreGivenAge"] = df_train.CreditScore / (df_train.Age)
-sns.boxplot(y="CreditScoreGivenAge", x="Exited", hue="Exited", data=df_train)
-plt.ylim(-1, 1)
-plt.savefig("CreditScoreGivenAge.pdf")
+# Introduce a variable to capture credit score given age to take into account credit behaviour visavis adult life
+df["CreditScoreGivenAge"] = df.CreditScore / (df.Age)
 
 # Arrange columns by data type for easier manipulation
 continuous_vars = [
@@ -109,5 +101,28 @@ continuous_vars = [
     "CreditScoreGivenAge",
 ]
 cat_vars = ["HasCrCard", "IsActiveMember", "Geography", "Gender"]
-df_train = df_train[["Exited"] + continuous_vars + cat_vars]
-df_train.head()
+df = df[["Exited"] + continuous_vars + cat_vars]
+# For the one hot variables, we change 0 to -1 so that the models can capture a negative relation
+# where the attribute in inapplicable instead of 0
+df.loc[df.HasCrCard == 0, "HasCrCard"] = -1
+df.loc[df.IsActiveMember == 0, "IsActiveMember"] = -1
+
+lst = ["Geography", "Gender"]
+remove = list()
+for i in lst:
+    if df[i].dtype == 'object':
+        for j in df[i].unique():
+            df[i + "_" + j] = np.where(df[i] == j, 1, -1)
+        remove.append(i)
+df = df.drop(remove, axis=1)
+print(df.head())
+
+minVec = df[continuous_vars].min().copy()
+maxVec = df[continuous_vars].max().copy()
+df[continuous_vars] = (df[continuous_vars] - minVec) / (maxVec - minVec)
+
+# Split Train, test data
+df_train = df.sample(frac=0.8, random_state=200)
+df_test = df.drop(df_train.index)
+print(len(df_train))
+print(len(df_test))
