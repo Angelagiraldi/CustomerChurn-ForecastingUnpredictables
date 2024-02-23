@@ -181,7 +181,7 @@ if optimize:
         "tol": [0.00001, 0.0001, 0.000001],
     }
     log_primal_Grid = GridSearchCV(
-        LogisticRegression(solver="lbfgs"), param_grid, cv=10, refit=True, verbose=0
+        LogisticRegression(solver="lbfgs"), param_grid, cv=10, scoring='f1', refit=True, verbose=0
     )
     log_primal_Grid.fit(df_train.loc[:, df_train.columns != "Exited"], df_train.Exited)
     best_model(log_primal_Grid)
@@ -199,7 +199,7 @@ if optimize:
     poly2 = PolynomialFeatures(degree=2)
     df_train_pol2 = poly2.fit_transform(df_train.loc[:, df_train.columns != "Exited"])
     log_pol2_Grid = GridSearchCV(
-        LogisticRegression(solver="liblinear"), param_grid, cv=5, refit=True, verbose=0
+        LogisticRegression(solver="liblinear"), param_grid, cv=5, scoring='f1', refit=True, verbose=0
     )
     log_pol2_Grid.fit(df_train_pol2, df_train.Exited)
     best_model(log_pol2_Grid)
@@ -212,7 +212,7 @@ if optimize:
         "probability": [True],
         "kernel": ["rbf"],
     }
-    SVM_grid = GridSearchCV(SVC(), param_grid, cv=3, refit=True, verbose=0)
+    SVM_grid = GridSearchCV(SVC(), param_grid, cv=5, scoring='f1', refit=True, verbose=0)
     SVM_grid.fit(df_train.loc[:, df_train.columns != "Exited"], df_train.Exited)
     best_model(SVM_grid)
 
@@ -225,7 +225,7 @@ if optimize:
         "kernel": ["poly"],
         "degree": [2, 3],
     }
-    SVM_grid = GridSearchCV(SVC(), param_grid, cv=3, refit=True, verbose=0)
+    SVM_grid = GridSearchCV(SVC(), param_grid, cv=5,scoring='f1', refit=True, verbose=0)
     SVM_grid.fit(df_train.loc[:, df_train.columns != "Exited"], df_train.Exited)
     best_model(SVM_grid)
 
@@ -238,7 +238,7 @@ if optimize:
         "min_samples_split": [3, 5, 6, 7],
     }
     RanFor_grid = GridSearchCV(
-        RandomForestClassifier(), param_grid, cv=5, refit=True, verbose=0
+        RandomForestClassifier(), param_grid, cv=5,scoring='f1', refit=True, verbose=0
     )
     RanFor_grid.fit(df_train.loc[:, df_train.columns != "Exited"], df_train.Exited)
     best_model(RanFor_grid)
@@ -251,7 +251,7 @@ if optimize:
         "learning_rate": [0.05, 0.1, 0.2, 0.3],
         "n_estimators": [5, 10, 20, 100],
     }
-    xgb_grid = GridSearchCV(XGBClassifier(), param_grid, cv=5, refit=True, verbose=0)
+    xgb_grid = GridSearchCV(XGBClassifier(), param_grid, cv=5, scoring='f1', refit=True, verbose=0)
     xgb_grid.fit(df_train.loc[:, df_train.columns != "Exited"], df_train.Exited)
     best_model(xgb_grid)
 else:
