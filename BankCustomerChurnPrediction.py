@@ -154,6 +154,15 @@ minVec = df[continuous_vars].min().copy()
 maxVec = df[continuous_vars].max().copy()
 df[continuous_vars] = (df[continuous_vars] - minVec) / (maxVec - minVec)
 
+# Calculate the correlation matrix
+corr_matrix = df[continuous_vars].corr()
+
+# Visualize the correlation matrix
+plt.figure(figsize=(10, 8))
+sns.heatmap(corr_matrix, annot=True, fmt=".2f", cmap='coolwarm', cbar=True)
+plt.title('Correlation Matrix of Dataset')
+plt.savefig("correlation_matrix.pdf")
+
 # Split Train, test data
 df_train = df.sample(frac=0.8, random_state=200)
 df_test = df.drop(df_train.index)
