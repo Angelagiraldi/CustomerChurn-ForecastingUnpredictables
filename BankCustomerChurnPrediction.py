@@ -22,11 +22,13 @@ from sklearn.metrics import classification_report
 from sklearn.metrics import roc_auc_score
 from sklearn.metrics import roc_curve
 
+import shap
+
 # Setting display options for better readability
 pd.options.display.max_rows = None
 pd.options.display.max_columns = None
 
-optimize = False
+optimize = True
 
 # Function to give best model score and parameters
 def best_model(model):
@@ -376,6 +378,21 @@ else:
         )
     )
     print("\n")
+
+    # Create a SHAP explainer
+    explainer = shap.Explainer(model)
+
+    # Calculate SHAP values - using a sample or the entire training set
+    X_sample = df_train.loc[:, df_train.columns != 'Exited'].sample(100, random_state=42)
+    shap_values = explainer.shap_values(X_sample)
+
+    # Generate the SHAP summary plot and save it
+    plt.figure()
+    shap.summary_plot(shap_values, X_sample, plot_type="bar", show=False)  # `show=False` prevents the plot from being shown immediately
+
+    # Save the figure
+    plt.savefig('shap_summary_plot.pdf', bbox_inches='tight')  # Saves the plot as a PDF file. Adjust the filename/path as needed.
+    plt.close()  # Closes the plot figure to free up memory
 
     # Fit Extreme Gradient Boost Classifier
     print("Extreme Gradient Boost Classifier: ")
