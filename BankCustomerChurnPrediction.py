@@ -28,7 +28,7 @@ import shap
 pd.options.display.max_rows = None
 pd.options.display.max_columns = None
 
-optimize = True
+optimize = False
 
 # Function to give best model score and parameters
 def best_model(model):
@@ -380,7 +380,7 @@ else:
     print("\n")
 
     # Create a SHAP explainer
-    explainer = shap.Explainer(model)
+    explainer = shap.Explainer(RF)
 
     # Calculate SHAP values - using a sample or the entire training set
     X_sample = df_train.loc[:, df_train.columns != 'Exited'].sample(100, random_state=42)
